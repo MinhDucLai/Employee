@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.company.repository.IEmployeeRepository">
+    <select id="getAllEmployees"
+            parameterType="com.company.form.EmployeeFilterForm"
+            resultType="com.company.entity.Employee">
+        SELECT 	id, employee_number, name, phone_number, position, email
+        FROM 	employee
+        <where>
+            <if test="q != null">
+                AND `name` LIKE CONCAT('%', #{q}, '%')
+            </if>
+            <if test="q != null">
+                OR `employee_number` = #{q}
+            </if>
+            <if test="q != null">
+                OR `phone_number` LIKE CONCAT('%', #{q}, '%')
+            </if>
+            <if test="q != null">
+                OR `position` LIKE CONCAT('%', #{q}, '%')
+            </if>
+            <if test="q != null">
+                OR `email` LIKE CONCAT('%', #{q}, '%')
+            </if>
+        </where>
+        ORDER BY
+        <if test="order.equals('ASC') and sortField.equals('id')">
+            id ASC
+        </if>
+        <if test="order.equals('DESC') and sortField.equals('id')">
+            id DESC
+        </if>
+        <if test="order.equals('ASC') and sortField.equals('name')">
+            `name` ASC
+        </if>
+        <if test="order.equals('DESC') and sortField.equals('name')">
+            `name` DESC
+        </if>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    <select id="getAllEmails" resultType="java.lang.String">
+        SELECT email FROM employee
+    </select>
+    <select id="countAllEmployees"
+            parameterType="com.company.form.EmployeeFilterForm"
+            resultType="java.lang.Integer">
+        SELECT  COUNT(1)
+        FROM 	employee
+        <where>
+            <if test="q != null">
+                AND `name` LIKE CONCAT('%', #{q}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="createEmployee"
+            parameterType="com.company.form.EmployeeRegisterForm"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO employee ( employee_number, name, phone_number, position, email )
+        VALUES 				   (#{employee_number},#{name},#{phone_number},#{position},#{email})
+
+    </insert>
+
+    <update id="updateEmployee" parameterType="com.company.entity.Employee">
+        UPDATE employee SET
+            employee_number = #{employee_number},
+            name = #{name},
+            phone_number=#{phone_number},
+            position=#{position},
+            email=#{email}
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <delete id="deleteEmployee" parameterType="com.company.entity.Employee">
+        DELETE FROM employee WHERE id = #{id}
+    </delete>
+
+    <select id="getEmployeeById" parameterType="java.lang.Integer" resultType="com.company.entity.Employee">
+        SELECT * FROM employee WHERE id = #{id}
+    </select>
+
+    <select id="existsById" parameterType="java.lang.Integer" resultType="java.lang.Boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM employee
+                      WHERE id = #{id})
+    </select>
+
+    <select id="existsByEmail" parameterType="java.lang.String" resultType="java.lang.Boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM employee
+                      WHERE email = #{email})
+    </select>
+
+    <select id="existsByPhoneNumber" parameterType="java.lang.String" resultType="java.lang.Boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM employee
+                      WHERE phone_number = #{phoneNumber})
+    </select>
+
+    <select id="existsByEmployeeNumber" parameterType="java.lang.Integer" resultType="java.lang.Boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM employee
+                      WHERE employee_number = #{employeeNumber})
+    </select>
+</mapper>
